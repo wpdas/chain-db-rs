@@ -8,8 +8,10 @@ use crate::{
         constants::{API, CONTRACT_PAYLOAD, CONTRACT_TRANSACTION},
         structures::TransactionType,
     },
-    ChainDB, ContractTransactionData,
+    ChainDB,
 };
+
+use super::structures::ContractTransactionData;
 
 #[derive(Debug)]
 pub struct Table<Model> {

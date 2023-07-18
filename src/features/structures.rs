@@ -51,3 +51,25 @@ impl SignedUserAccount {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BasicResponse<D> {
+    pub success: bool,
+    pub error_msg: String,
+    pub data: Option<D>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContractTransactionData<Model> {
+    pub tx_type: TransactionType,
+    pub contract_id: String,
+    pub timestamp: Option<u64>,
+    pub data: Model,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TransferUnitsRegistry {
+    pub from: String,
+    pub to: String,
+    pub units: u64,
+}

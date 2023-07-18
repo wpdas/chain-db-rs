@@ -4,37 +4,15 @@ use features::{
         GET_USER_ACCOUNT, GET_USER_ACCOUNT_BY_ID, TRANSFER_UNITS,
     },
     structures::Access,
-    structures::{SignedUserAccount, TransactionType},
+    structures::{BasicResponse, SignedUserAccount, TransferUnitsRegistry},
     table::Table,
 };
 use reqwest::header::CONTENT_TYPE;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::json;
 
 mod features;
 mod test;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct BasicResponse<D> {
-    pub success: bool,
-    pub error_msg: String,
-    pub data: Option<D>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ContractTransactionData<Model> {
-    pub tx_type: TransactionType,
-    pub contract_id: String,
-    pub timestamp: Option<u64>,
-    pub data: Model,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TransferUnitsRegistry {
-    pub from: String,
-    pub to: String,
-    pub units: u64,
-}
 
 // ChainDB features
 #[derive(Clone)]
@@ -235,17 +213,6 @@ mod tests {
     use super::*;
 
     // WARNING: Make sure the ChainDB is running.
-
-    // - criar conta - OK
-    // - criar conta com mesmo nome [ERRO] - OK
-    // - obter informacao do usuario por senha - OK
-    // - obter informacao do usuario por user_id - OK
-    // - fazer transferencia entre dos users com fundos - OK
-    // - fazer transferencia com fundos insuficientes - OK
-    // - obter registro de transferencia de usuario por user_id - OK
-    // - obter a lista de registro de transferencia de usuario por user_id - OK
-    // - criar uma tabela e persistir um dado, checar o novo dado persistido - OK
-
     fn random_str() -> String {
         let charset = "abcdefghijklmnopqrstuvwxyz";
         random_string::generate(12, charset)
@@ -276,7 +243,10 @@ mod tests {
 
         assert_eq!(new_user.success, true);
         assert_eq!(new_user_2.success, false);
-        assert_eq!(new_user_2.error_msg, "This user name is already taken".to_string());
+        assert_eq!(
+            new_user_2.error_msg,
+            "This user name is already taken".to_string()
+        );
     }
 
     // #[tokio::test]
@@ -287,8 +257,9 @@ mod tests {
             .create_user_account(random_user_name.as_str(), "fake123pass", Some(10), None)
             .await;
 
-
-        let info_user_call = db.get_user_account(random_user_name.as_str(), "fake123pass").await;
+        let info_user_call = db
+            .get_user_account(random_user_name.as_str(), "fake123pass")
+            .await;
         let user = info_user_call.data.unwrap();
         assert_eq!(user.user_name, random_user_name.as_str());
         assert_eq!(user.units, 10);
@@ -302,7 +273,6 @@ mod tests {
             .create_user_account(random_user_name.as_str(), "fake123pass", Some(10), None)
             .await;
         let user_id = new_user.data.unwrap().id;
-
 
         let info_user_call = db.get_user_account_by_id(&user_id).await;
         let user = info_user_call.data.unwrap();
@@ -350,7 +320,10 @@ mod tests {
         let user_id_2 = new_user_2.data.unwrap().id;
 
         let tranference_response = db.transfer_units(&user_id_1, &user_id_2, 11).await;
-        assert_eq!(tranference_response.error_msg, "Sender user does not have enough units");
+        assert_eq!(
+            tranference_response.error_msg,
+            "Sender user does not have enough units"
+        );
     }
 
     async fn get_user_tranfer_record() {
