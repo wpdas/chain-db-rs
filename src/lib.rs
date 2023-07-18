@@ -3,8 +3,7 @@ use features::{
         API, CREATE_USER_ACCOUNT, GET_ALL_TRANSFER_BY_USER_ID, GET_TRANSFER_BY_USER_ID,
         GET_USER_ACCOUNT, GET_USER_ACCOUNT_BY_ID, TRANSFER_UNITS,
     },
-    structures::Access,
-    structures::{BasicResponse, SignedUserAccount, TransferUnitsRegistry},
+    structures::{Access, BasicResponse, SignedUserAccount, TransferUnitsRegistry},
     table::Table,
 };
 use reqwest::header::CONTENT_TYPE;
