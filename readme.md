@@ -30,7 +30,8 @@ App using the Chain DB Client:
 #[tokio::main]
 async fn main() {
   // 1 - DB connection
-  let db = ChainDB::connect("my-db", "root", "1234");
+  // If the `server` parameter is empty(None), then "http://localhost:2818" will be used.
+  let db = ChainDB::connect(None, "my-db", "root", "1234");
 
   // 2 - Init a table
   // Greeting table: table_name | model_instance (schema)

@@ -31,7 +31,8 @@ impl<Model: DeserializeOwned + Serialize> Table<Model> {
 
         // Load content from chain
         let url = format!(
-            "http://localhost:2818/{path}/{contract_id}/{db_access_key}",
+            "{api}/{path}/{contract_id}/{db_access_key}",
+            api = db.api,
             path = CONTRACT_PAYLOAD,
             contract_id = contract_id,
             db_access_key = db.access_key,

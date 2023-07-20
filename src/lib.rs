@@ -16,13 +16,18 @@ mod test;
 // ChainDB features
 #[derive(Clone)]
 pub struct ChainDB {
+    pub api: &'static str,
     pub name: String,
     pub access: Access,
     pub access_key: String,
 }
 
 impl ChainDB {
-    pub fn connect(data_base: &'static str, user: &'static str, password: &'static str) -> Self {
+    /**
+     * Connection information.
+     * If the `server` parameter is empty, then "http://localhost:2818" will be used.
+     */
+    pub fn connect(server:Option<&'static str>, data_base: &'static str, user: &'static str, password: &'static str) -> Self {
         let key_data = format!(
             "{db_name}{db_user}{db_pass}",
             db_name = data_base,
@@ -32,6 +37,7 @@ impl ChainDB {
         let key = sha256::digest(key_data);
 
         Self {
+            api: server.unwrap_or(API),
             name: data_base.to_string(),
             access: Access {
                 user: user,
@@ -62,7 +68,7 @@ impl ChainDB {
 
         let json_body = serde_json::to_string(&body).unwrap();
 
-        let url = format!("{api}{route}", api = API, route = CREATE_USER_ACCOUNT);
+        let url = format!("{api}{route}", api = self.api, route = CREATE_USER_ACCOUNT);
 
         let client = reqwest::Client::new();
         let response = client
@@ -89,7 +95,7 @@ impl ChainDB {
     ) -> BasicResponse<SignedUserAccount> {
         let url = format!(
             "{api}{route}/{user_name}/{user_pass}/{db_access_key}",
-            api = API,
+            api = self.api,
             route = GET_USER_ACCOUNT,
             user_name = user_name,
             user_pass = password,
@@ -110,7 +116,7 @@ impl ChainDB {
     ) -> BasicResponse<SignedUserAccount> {
         let url = format!(
             "{api}{route}/{user_id}/{db_access_key}",
-            api = API,
+            api = self.api,
             route = GET_USER_ACCOUNT_BY_ID,
             user_id = user_id,
             db_access_key = self.access_key
@@ -130,7 +136,7 @@ impl ChainDB {
         to: &String,
         units: u64,
     ) -> BasicResponse<String> {
-        let url = format!("{api}{route}", api = API, route = TRANSFER_UNITS);
+        let url = format!("{api}{route}", api = self.api, route = TRANSFER_UNITS);
 
         let body = json!({
             "db_access_key": self.access_key,
@@ -165,7 +171,7 @@ impl ChainDB {
     ) -> BasicResponse<TransferUnitsRegistry> {
         let url = format!(
             "{api}{route}/{user_id}/{db_access_key}",
-            api = API,
+            api = self.api,
             route = GET_TRANSFER_BY_USER_ID,
             user_id = user_id,
             db_access_key = self.access_key,
@@ -185,7 +191,7 @@ impl ChainDB {
     ) -> BasicResponse<Vec<TransferUnitsRegistry>> {
         let url = format!(
             "{api}{route}/{user_id}/{db_access_key}",
-            api = API,
+            api = self.api,
             route = GET_ALL_TRANSFER_BY_USER_ID,
             user_id = user_id,
             db_access_key = self.access_key,
@@ -219,7 +225,7 @@ mod tests {
 
     // #[tokio::test]
     async fn create_user_account() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name = random_str();
         let new_user = db
             .create_user_account(random_user_name.as_str(), "fake123pass", Some(10), None)
@@ -230,7 +236,7 @@ mod tests {
 
     // #[tokio::test]
     async fn create_user_account_with_name_already_taken_return_err() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name = random_str();
         let new_user = db
             .create_user_account(random_user_name.as_str(), "fake123pass", Some(10), None)
@@ -250,7 +256,7 @@ mod tests {
 
     // #[tokio::test]
     async fn get_user_info_with_user_and_password() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name = random_str();
         let new_user = db
             .create_user_account(random_user_name.as_str(), "fake123pass", Some(10), None)
@@ -266,7 +272,7 @@ mod tests {
     }
 
     async fn get_user_info_by_id() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name = random_str();
         let new_user = db
             .create_user_account(random_user_name.as_str(), "fake123pass", Some(10), None)
@@ -281,7 +287,7 @@ mod tests {
 
     // #[tokio::test]
     async fn transfer_units_between_two_users() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name_1 = random_str();
         let new_user = db
             .create_user_account(random_user_name_1.as_str(), "fake123pass", Some(10), None)
@@ -305,7 +311,7 @@ mod tests {
     }
 
     async fn transfer_units_between_two_users_with_no_enough_units_err() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name_1 = random_str();
         let new_user = db
             .create_user_account(random_user_name_1.as_str(), "fake123pass", Some(10), None)
@@ -326,7 +332,7 @@ mod tests {
     }
 
     async fn get_user_tranfer_record() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name_1 = random_str();
         let new_user = db
             .create_user_account(random_user_name_1.as_str(), "fake123pass", Some(10), None)
@@ -351,7 +357,7 @@ mod tests {
     }
 
     async fn get_all_user_tranfer_records() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let random_user_name_1 = random_str();
         let new_user = db
             .create_user_account(random_user_name_1.as_str(), "fake123pass", Some(10), None)
@@ -374,7 +380,7 @@ mod tests {
     }
 
     async fn create_table_and_write_read_data() {
-        let db = ChainDB::connect("test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
         let mut test_table = db.get_table("test", TestTable::new).await;
         assert_eq!(test_table.table.greeting, String::from("Hi"));
         assert_eq!(test_table.table.year, 2023);
