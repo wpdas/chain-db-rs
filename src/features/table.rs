@@ -38,6 +38,17 @@ impl<Model: DeserializeOwned + Serialize> Table<Model> {
         );
         let res_json = reqwest::get(url).await.unwrap().text().await.unwrap();
 
+        // Check if any info was found
+        let data_json_check: HashMap<String, Value> = serde_json::from_str(&res_json).unwrap();
+        let tx_type_check = data_json_check.get("tx_type").unwrap().as_str().unwrap();
+        if tx_type_check == "NONE" {
+            return Self {
+                contract_id: contract_id.clone(),
+                table: get_model_instance(),
+                db: db.clone(),
+            }
+        }
+
         let contract_data_json: ContractTransactionData<Model> = serde_json::from_str(&res_json).unwrap();
 
         // If there's already a table (contract) with data, then, fetch its data
