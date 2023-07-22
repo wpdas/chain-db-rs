@@ -14,7 +14,7 @@ mod features;
 mod test;
 
 // ChainDB features
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ChainDB {
     pub api: &'static str,
     pub name: String,
@@ -163,7 +163,7 @@ impl ChainDB {
     }
 
     /**
-     * Fetch Transfer Records by User
+     * Fetch the last Transference of units Records by User
      */
     pub async fn get_transfer_by_user_id(
         &self,
@@ -183,7 +183,7 @@ impl ChainDB {
     }
 
     /**
-     * Fetch all Transfer Records by User
+     * Fetch all Transference of units Records by User
      */
     pub async fn get_all_transfers_by_user_id(
         &self,
@@ -202,6 +202,9 @@ impl ChainDB {
         serde_json::from_str::<BasicResponse<Vec<TransferUnitsRegistry>>>(&res_json).unwrap()
     }
 
+    /**
+     * Initialize a table, fetching its more updated data
+     */
     pub async fn get_table<Model: DeserializeOwned + Serialize>(
         &self,
         table_name: &'static str,

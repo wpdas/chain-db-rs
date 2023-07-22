@@ -8,7 +8,7 @@ pub enum TransactionType {
     TRANSFER,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Access {
     pub user: &'static str,
     pub password: &'static str,
