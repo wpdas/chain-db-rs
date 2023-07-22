@@ -112,7 +112,7 @@ impl ChainDB {
      */
     pub async fn get_user_account_by_id(
         &self,
-        user_id: &String,
+        user_id: &str,
     ) -> BasicResponse<SignedUserAccount> {
         let url = format!(
             "{api}{route}/{user_id}/{db_access_key}",
@@ -149,8 +149,8 @@ impl ChainDB {
      */
     pub async fn transfer_units(
         &self,
-        from: &String,
-        to: &String,
+        from: &str,
+        to: &str,
         units: u64,
     ) -> BasicResponse<String> {
         let url = format!("{api}{route}", api = self.api, route = TRANSFER_UNITS);
@@ -184,7 +184,7 @@ impl ChainDB {
      */
     pub async fn get_transfer_by_user_id(
         &self,
-        user_id: &String,
+        user_id: &str,
     ) -> BasicResponse<TransferUnitsRegistry> {
         let url = format!(
             "{api}{route}/{user_id}/{db_access_key}",
@@ -204,7 +204,7 @@ impl ChainDB {
      */
     pub async fn get_all_transfers_by_user_id(
         &self,
-        user_id: &String,
+        user_id: &str,
     ) -> BasicResponse<Vec<TransferUnitsRegistry>> {
         let url = format!(
             "{api}{route}/{user_id}/{db_access_key}",
@@ -417,35 +417,14 @@ mod tests {
 
     #[tokio::test]
     async fn integration_all_features() {
-        // create_user_account().await;
-        // create_user_account_with_name_already_taken_return_err().await;
-        // get_user_info_with_user_and_password().await;
-        // get_user_info_by_id().await;
-        // transfer_units_between_two_users().await;
-        // transfer_units_between_two_users_with_no_enough_units_err().await;
-        // get_user_tranfer_record().await;
-        // get_all_user_tranfer_records().await;
-        // create_table_and_write_read_data().await;
-        f().await;
-    }
-
-    async fn f() {
-        let db = ChainDB::connect(None, "test-db", "root", "1234");
-        let user_name = "wenderson.fake";
-        let user_pass = "1234";
-        let user_name_taken = db.check_user_name(&user_name).await;
-
-        if !user_name_taken.success {
-            let user = db
-                .create_user_account(user_name, user_pass, Some(2), None)
-                .await;
-            
-            println!("{:?}", user.data.unwrap());
-            // SignedUserAccount { 
-            //     id: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
-            //     user_name: "wenderson.fake",
-            //     units: 2
-            // }
-        }
+        create_user_account().await;
+        create_user_account_with_name_already_taken_return_err().await;
+        get_user_info_with_user_and_password().await;
+        get_user_info_by_id().await;
+        transfer_units_between_two_users().await;
+        transfer_units_between_two_users_with_no_enough_units_err().await;
+        get_user_tranfer_record().await;
+        get_all_user_tranfer_records().await;
+        create_table_and_write_read_data().await;
     }
 }

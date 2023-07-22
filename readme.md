@@ -31,7 +31,7 @@ Make sure you have the database running on your local machine or use the server 
 
 ### Table
 
-Tables must be simple class with default values, empty or not. This class will be used as a reference to create the table's fields.
+Tables must a struct. This struct will be used as a reference to create the table's fields.
 
 When it's time to persist the table's data on the chain, just call the `persit` database function.
 
@@ -103,4 +103,97 @@ if !user_name_taken.success {
     //     units: 2
     // }
 }
+```
+
+### Get User Account Info
+
+This feature can be used for the "Login/Sign In" action.
+
+```rs
+let user_name = "wenderson.fake";
+let user_pass = "1234";
+
+let user = db.get_user_account(&user_name, user_pass).await;
+println!("{:?}", user.data.unwrap());
+// SignedUserAccount {
+//     id: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
+//     user_name: "wenderson.fake",
+//     units: 2
+// }
+```
+
+### Get User Account Info By User Id
+
+Just another way to fetch the user info.
+
+```rs
+let wenderson_id = "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3";
+let user = db.get_user_account_by_id(&wenderson_id).await;
+
+println!("{:?}", user.data.unwrap());
+// SignedUserAccount {
+//     id: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
+//     user_name: "wenderson.fake",
+//     units: 2
+// }
+```
+
+### Transfer Units Between Two Users
+
+As said before, `unit` property present in each user's account can be anything the project wants, it can be a type of currency, item, resource.
+
+Below is an example of user `wenderson` trying to send 2 units to `suly`:
+
+```rs
+let wenderson_id = "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3";
+let suly_id = "136c406933d98e5c8bb4820f5145869bb5ad40647b768de4e9adb2a52d0dea2f";
+
+let wenderson_data_opt = db.get_user_account_by_id(&wenderson_id).await;
+let wenderson_data = wenderson_data_opt.data.unwrap();
+let units_to_transfer = 2;
+
+if wenderson_data.units >= units_to_transfer {
+    let res = db.transfer_units(&wenderson_id, &suly_id, units_to_transfer).await;
+    println!("{:?}", res.success);
+    // true / false
+}
+```
+
+### Fetching the Latest Units Transfer Record
+
+Use this feature to get the last unit transfer record involving a user.
+
+```rs
+let wenderson_id = "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3";
+let last_units_transference_record = db.get_transfer_by_user_id(&wenderson_id).await;
+
+println!("{:?}", last_units_transference_record.data.unwrap());
+// TransferUnitsRegistry {
+//     from: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
+//     to: "136c406933d98e5c8bb4820f5145869bb5ad40647b768de4e9adb2a52d0dea2f",
+//     units: 2
+// }
+```
+
+### Fetching All the Transfer of Units Records
+
+Use this feature to get the last unit transfer record involving a user.
+
+```rs
+let wenderson_id = "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3";
+let all_units_transfers_record = db.get_all_transfers_by_user_id(&wenderson_id).await;
+
+println!("{:?}", all_units_transfers_record.data.unwrap());
+// [
+//    TransferUnitsRegistry {
+//        from: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
+//        to: "136c406933d98e5c8bb4820f5145869bb5ad40647b768de4e9adb2a52d0dea2f",
+//        units: 2
+//    },
+//    TransferUnitsRegistry {
+//        from: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
+//        to: "136c406933d98e5c8bb4820f5145869bb5ad40647b768de4e9adb2a52d0dea2f",
+//        units: 2
+//    }
+// ]
 ```
