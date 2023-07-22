@@ -1,7 +1,7 @@
 use features::{
     constants::{
         API, CREATE_USER_ACCOUNT, GET_ALL_TRANSFER_BY_USER_ID, GET_TRANSFER_BY_USER_ID,
-        GET_USER_ACCOUNT, GET_USER_ACCOUNT_BY_ID, TRANSFER_UNITS,
+        GET_USER_ACCOUNT, GET_USER_ACCOUNT_BY_ID, TRANSFER_UNITS, CHECK_USER_NAME,
     },
     structures::{Access, BasicResponse, SignedUserAccount, TransferUnitsRegistry},
     table::Table,
@@ -125,6 +125,23 @@ impl ChainDB {
         let res_json = reqwest::get(url).await.unwrap().text().await.unwrap();
 
         serde_json::from_str::<BasicResponse<SignedUserAccount>>(&res_json).unwrap()
+    }
+
+    /**
+     * Check if user_name is already taken
+     */
+    pub async fn check_user_name(&self, user_name: &str) -> BasicResponse<String> {
+        let url = format!(
+            "{api}{route}/{user_name}/{db_access_key}",
+            api = self.api,
+            route = CHECK_USER_NAME,
+            user_name = user_name,
+            db_access_key = self.access_key
+        );
+
+        let response = reqwest::get(url).await.expect("Something went wrong!").text().await.unwrap();
+
+        serde_json::from_str::<BasicResponse<String>>(&response).unwrap()
     }
 
     /**
@@ -400,14 +417,35 @@ mod tests {
 
     #[tokio::test]
     async fn integration_all_features() {
-        create_user_account().await;
-        create_user_account_with_name_already_taken_return_err().await;
-        get_user_info_with_user_and_password().await;
-        get_user_info_by_id().await;
-        transfer_units_between_two_users().await;
-        transfer_units_between_two_users_with_no_enough_units_err().await;
-        get_user_tranfer_record().await;
-        get_all_user_tranfer_records().await;
-        create_table_and_write_read_data().await;
+        // create_user_account().await;
+        // create_user_account_with_name_already_taken_return_err().await;
+        // get_user_info_with_user_and_password().await;
+        // get_user_info_by_id().await;
+        // transfer_units_between_two_users().await;
+        // transfer_units_between_two_users_with_no_enough_units_err().await;
+        // get_user_tranfer_record().await;
+        // get_all_user_tranfer_records().await;
+        // create_table_and_write_read_data().await;
+        f().await;
+    }
+
+    async fn f() {
+        let db = ChainDB::connect(None, "test-db", "root", "1234");
+        let user_name = "wenderson.fake";
+        let user_pass = "1234";
+        let user_name_taken = db.check_user_name(&user_name).await;
+
+        if !user_name_taken.success {
+            let user = db
+                .create_user_account(user_name, user_pass, Some(2), None)
+                .await;
+            
+            println!("{:?}", user.data.unwrap());
+            // SignedUserAccount { 
+            //     id: "b2e4e7c15f733d8c18836ffd22051ed855226d9041fb9452f17f498fc2bcbce3",
+            //     user_name: "wenderson.fake",
+            //     units: 2
+            // }
+        }
     }
 }

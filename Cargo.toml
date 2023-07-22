@@ -1,5 +1,5 @@
 [package]
-name = "chain_db_rust"
+name = "chain_db_rs"
 version = "0.0.1"
 edition = "2021"
 
