@@ -75,7 +75,7 @@ async fn main() {
 }
 ```
 
-The next examples will not include the `db` implementation as this is implied.
+The next examples will not include the `db` implementation and the `async fn main() {}` block as this is implied.
 
 ### Create User Account
 
