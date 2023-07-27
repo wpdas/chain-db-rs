@@ -1,5 +1,5 @@
 // Contants
-pub const API: &'static str = "https://gull-dominant-mistakenly.ngrok-free.app";
+pub const API: &'static str = "http://localhost:2818";
 pub const CONTRACT_PAYLOAD: &'static str = "/get_last_contract_transaction";
 pub const CONTRACT_TRANSACTIONS_PAYLOAD: &'static str = "/get_contract_transactions";
 pub const CONTRACT_TRANSACTION: &'static str = "/post_contract_transaction";

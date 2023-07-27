@@ -65,6 +65,8 @@ pub struct ContractTransactionData<Model> {
     pub contract_id: String,
     pub timestamp: Option<u64>,
     pub data: Model,
+    pub block_hash: String,
+    pub block_height: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
