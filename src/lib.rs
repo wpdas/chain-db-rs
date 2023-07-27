@@ -400,7 +400,7 @@ mod tests {
     }
 
     async fn create_table_and_write_read_data() {
-        let db = ChainDB::connect(None, "test-db", "root", "1234");
+        let db = ChainDB::connect(None, "test-db-v2", "root", "1234");
         let mut test_table = db.get_table("test", TestTable::new).await;
         assert_eq!(test_table.table.greeting, String::from("Hi"));
         assert_eq!(test_table.table.year, 2023);
@@ -415,6 +415,36 @@ mod tests {
         test_table.persist().await;
     }
 
+    async fn get_table_history() {
+        let _db = ChainDB::connect(None, "test-db", "root", "1234");
+        let mut test_table = _db.get_table("test", TestTable::new).await;
+
+        // Persist some data
+        test_table.table.greeting = "Ola amigo!".to_string();
+        test_table.table.year = 1990;
+        test_table.persist().await;
+
+        test_table.table.greeting = "Hello my dear friend!".to_string();
+        test_table.table.year = 2012;
+        test_table.persist().await;
+
+        let history = test_table.get_history(50).await;
+
+        println!("{:?}", history);
+        // [
+        //     TestTable { greeting: 'Hello my dear friend!', year: 2023 }
+        //     TestTable { greeting: 'Ola amigo!', year: 2023 }
+        //     TestTable { greeting: 'Oi', year: 2022 }
+        //     TestTable { greeting: 'E ae!!!', year: 1990 }
+        //     TestTable { greeting: 'Hi', year: 1999 }
+        //     ...
+        // ]
+
+        let result = history.len() > 2;
+        assert_eq!(result, true);
+        
+    }
+
     #[tokio::test]
     async fn integration_all_features() {
         create_user_account().await;
@@ -426,6 +456,7 @@ mod tests {
         get_user_tranfer_record().await;
         get_all_user_tranfer_records().await;
         create_table_and_write_read_data().await;
+        get_table_history().await;
     }
 
 }

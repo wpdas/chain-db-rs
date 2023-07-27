@@ -15,6 +15,7 @@ Visit the [Chain DB repository](https://github.com/wpdas/chain-db) to get to kno
 Install using cargo. You'll need to install serde json to create your tables structs as well:
 
 ```sh
+# TODO: Not available yet
 cargo add chain_db_rs
 cargo add serde_json
 ```
@@ -76,6 +77,37 @@ async fn main() {
 ```
 
 The next examples will not include the `db` implementation and the `async fn main() {}` block as this is implied.
+
+### Get Table's History
+
+You can use `Table.get_history(depth: u64)` to get the last X changes.
+
+```rs
+let mut test_table = _db.get_table("test", TestTable::new).await;
+
+// Persist some data
+test_table.table.greeting = "Ola amigo!".to_string();
+test_table.table.year = 1990;
+test_table.persist().await;
+
+test_table.table.greeting = "Hello my dear friend!".to_string();
+test_table.table.year = 2012;
+test_table.persist().await;
+
+let history = test_table.get_history(50).await;
+
+println!("{:?}", history);
+// [
+//     TestTable { greeting: 'Hello my dear friend!', year: 2023 }
+//     TestTable { greeting: 'Ola amigo!', year: 2023 }
+//     TestTable { greeting: 'Oi', year: 2022 }
+//     TestTable { greeting: 'E ae!!!', year: 1990 }
+//     TestTable { greeting: 'Hi', year: 1999 }
+//     ...
+// ]
+```
+
+This can be useful when the application needs to fetch a list of things, such as messages.
 
 ### Create User Account
 
