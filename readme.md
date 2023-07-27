@@ -98,8 +98,8 @@ let history = test_table.get_history(50).await;
 
 println!("{:?}", history);
 // [
-//     TestTable { greeting: 'Hello my dear friend!', year: 2023 }
-//     TestTable { greeting: 'Ola amigo!', year: 2023 }
+//     TestTable { greeting: 'Hello my dear friend!', year: 2012 }
+//     TestTable { greeting: 'Ola amigo!', year: 1990 }
 //     TestTable { greeting: 'Oi', year: 2022 }
 //     TestTable { greeting: 'E ae!!!', year: 1990 }
 //     TestTable { greeting: 'Hi', year: 1999 }
